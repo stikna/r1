@@ -1,9 +1,4 @@
 ---
-title: "lab3"
-format: html
----
-
----
 title: "Основы обработки данных с помощью R и Dplyr"
 format: 
   md:
