@@ -22,30 +22,40 @@
 
 ## Шаги:
 
-sessionInfo() R version 4.5.1 (2025-06-13 ucrt) Platform:
-x86_64-w64-mingw32/x64 Running under: Windows 11 x64 (build 26100)
+``` r
+sessionInfo()
+```
 
-Matrix products: default LAPACK version 3.12.1
+    R version 4.5.1 (2025-06-13 ucrt)
+    Platform: x86_64-w64-mingw32/x64
+    Running under: Windows 11 x64 (build 26100)
 
-locale: \[1\] LC_COLLATE=Russian_Russia.utf8
-LC_CTYPE=Russian_Russia.utf8  
-\[3\] LC_MONETARY=Russian_Russia.utf8 LC_NUMERIC=C  
-\[5\] LC_TIME=Russian_Russia.utf8
+    Matrix products: default
+      LAPACK version 3.12.1
 
-time zone: Europe/Moscow tzcode source: internal
+    locale:
+    [1] LC_COLLATE=Russian_Russia.utf8  LC_CTYPE=Russian_Russia.utf8   
+    [3] LC_MONETARY=Russian_Russia.utf8 LC_NUMERIC=C                   
+    [5] LC_TIME=Russian_Russia.utf8    
 
-attached base packages: \[1\] stats graphics grDevices utils datasets
-methods base
+    time zone: Europe/Moscow
+    tzcode source: internal
 
-loaded via a namespace (and not attached): \[1\] compiler_4.5.1
-tools_4.5.1
+    attached base packages:
+    [1] stats     graphics  grDevices utils     datasets  methods   base     
+
+    loaded via a namespace (and not attached):
+     [1] compiler_4.5.1    fastmap_1.2.0     cli_3.6.5         tools_4.5.1      
+     [5] htmltools_0.5.8.1 yaml_2.3.10       rmarkdown_2.30    knitr_1.50       
+     [9] jsonlite_2.0.0    xfun_0.53         digest_0.6.37     rlang_1.1.6      
+    [13] evaluate_1.0.5   
 
 Проанализировать встроенный в пакет dplyr набор данных starwars с
 помощью языка R и ответить на вопросы:
 
 1.  Сколько строк в датафрейме?
 
-> starwars %\>% nrow() \[1\] 87
+> nrow(starwars) \[1\] 87
 
 1.  Сколько столбцов в датафрейме?
 
@@ -54,22 +64,24 @@ tools_4.5.1
 1.  Как просмотреть примерный вид датафрейма?
 
 > starwars %\>% glimpse() Rows: 87 Columns: 14 $ name <chr> “Luke
-> Skywalker”, “C-3PO”, “R2-D2”, “Darth Vader”, “Leia Or… $ height <int>
-> 172, 167, 96, 202, 150, 178, 165, 97, 183, 182, 188, 180, 2… $ mass
-> <dbl> 77.0, 75.0, 32.0, 136.0, 49.0, 120.0, 75.0, 32.0, 84.0, 77.… $
-> hair_color <chr>”blond”, NA, NA, “none”, “brown”, “brown, grey”,
-> “brown”, N… $ skin_color <chr> “fair”, “gold”, “white, blue”, “white”,
-> “light”, “light”, “… $ eye_color <chr>”blue”, “yellow”, “red”,
-> “yellow”, “brown”, “blue”, “blue”,… $ birth_year <dbl> 19.0, 112.0,
-> 33.0, 41.9, 19.0, 52.0, 47.0, NA, 24.0, 57.0, … $ sex <chr> “male”,
-> “none”, “none”, “male”, “female”, “male”, “female”,… $ gender <chr>
-> “masculine”, “masculine”, “masculine”, “masculine”, “femini… $
-> homeworld <chr>”Tatooine”, “Tatooine”, “Naboo”, “Tatooine”,
-> “Alderaan”, “T… $ species <chr>”Human”, “Droid”, “Droid”, “Human”,
-> “Human”, “Human”, “Huma… $ films <list> \<”A New Hope”, “The Empire
-> Strikes Back”, “Return of the J… $ vehicles <list> \<”Snowspeeder”,
-> “Imperial Speeder Bike”\>, \<\>, \<\>, \<\>, “Imp… $ starships <list>
-> \<”X-wing”, “Imperial shuttle”\>, \<\>, \<\>, “TIE Advanced x1”,…
+> Skywalker”, “C-3PO”, “R2-D2”, “Darth Vader”, “Leia Organa”, “O… $
+> height <int> 172, 167, 96, 202, 150, 178, 165, 97, 183, 182, 188, 180,
+> 228, 180, … $ mass <dbl> 77.0, 75.0, 32.0, 136.0, 49.0, 120.0, 75.0,
+> 32.0, 84.0, 77.0, 84.0, … $ hair_color <chr>”blond”, NA, NA, “none”,
+> “brown”, “brown, grey”, “brown”, NA, “black… $ skin_color <chr>”fair”,
+> “gold”, “white, blue”, “white”, “light”, “light”, “light”, “… $
+> eye_color <chr>”blue”, “yellow”, “red”, “yellow”, “brown”, “blue”,
+> “blue”, “red”, “… $ birth_year <dbl> 19.0, 112.0, 33.0, 41.9, 19.0,
+> 52.0, 47.0, NA, 24.0, 57.0, 41.9, 64.… $ sex <chr>”male”, “none”,
+> “none”, “male”, “female”, “male”, “female”, “none”, … $ gender <chr>
+> “masculine”, “masculine”, “masculine”, “masculine”, “feminine”, “mas…
+> $ homeworld <chr>”Tatooine”, “Tatooine”, “Naboo”, “Tatooine”,
+> “Alderaan”, “Tatooine”,… $ species <chr> “Human”, “Droid”, “Droid”,
+> “Human”, “Human”, “Human”, “Human”, “Droi… $ films <list> \<”A New
+> Hope”, “The Empire Strikes Back”, “Return of the Jedi”, “Re… $
+> vehicles <list> \<”Snowspeeder”, “Imperial Speeder Bike”\>, \<\>,
+> \<\>, \<\>, “Imperial Spe… $ starships <list> \<”X-wing”, “Imperial
+> shuttle”\>, \<\>, \<\>, “TIE Advanced x1”, \<\>, \<\>, …
 
 1.  Сколько уникальных рас персонажей (species) представлено в данных?
 
