@@ -53,10 +53,10 @@ sessionInfo()
 
 ## Подготовка данных
 
-1.  Импортируйте данные в R. Это можно выполнить с помощью
-    jsonlite::stream_in(file()) . Датасет находится по адресу
-    https://storage.yandexcloud.net/iamcth-data/dataset.tar.gz. Также
-    загрузили справочник по условным кодам журнала Windows.
+1\. Импортируйте данные в R. Это можно выполнить с помощью
+jsonlite::stream_in(file()) . Датасет находится по адресу
+https://storage.yandexcloud.net/iamcth-data/dataset.tar.gz. Также
+загрузили справочник по условным кодам журнала Windows.
 
 ``` r
 library(tidyverse)
@@ -322,14 +322,14 @@ glimpse(event_df)
     $ `Potential Criticality`    <chr> "High", "High", "High", "High", "High", "Hi…
     $ `Event Summary`            <chr> "A monitored security event pattern has occ…
 
-1.  Привести датасеты в вид “аккуратных данных”, преобразовать типы
-    столбцов в соответствии с типом данных
+2\. Привести датасеты в вид “аккуратных данных”, преобразовать типы
+столбцов в соответствии с типом данных
 
 ``` r
 data$`@timestamp` <- as.POSIXct(data$`@timestamp`,format = "%Y-%m-%dT%H:%M:%OSZ", tz = "UTC")
 ```
 
-1.  Просмотрите общую структуру данных с помощью функции glimpse()
+3\. Просмотрите общую структуру данных с помощью функции glimpse()
 
 ``` r
 glimpse(data)
@@ -349,12 +349,11 @@ glimpse(data)
 
 ## Анализ
 
-1.  Раскройте датафрейм избавившись от вложенных датафреймов. Для
-    обнаружения таких можно использовать функцию dplyr::glimpse() , а
-    для раскрытия вложенности – tidyr::unnest() . Обратите внимание, что
-    при раскрытии теряются внешние названия колонок – это можно
-    предотвратить если использовать параметр tidyr::unnest(…, names_sep
-    = ) .
+1\. Раскройте датафрейм избавившись от вложенных датафреймов. Для
+обнаружения таких можно использовать функцию dplyr::glimpse() , а для
+раскрытия вложенности – tidyr::unnest() . Обратите внимание, что при
+раскрытии теряются внешние названия колонок – это можно предотвратить
+если использовать параметр tidyr::unnest(…, names_sep = ) .
 
 ``` r
 data <- data %>% tidyr::unnest(cols = c(`@metadata`, event, log, winlog, ecs, host, agent), names_sep = "_")
@@ -398,8 +397,8 @@ glimpse(data)
     $ agent_version        <chr> "7.4.0", "7.4.0", "7.4.0", "7.4.0", "7.4.0", "7.4…
     $ agent_type           <chr> "winlogbeat", "winlogbeat", "winlogbeat", "winlog…
 
-1.  Минимизируйте количество колонок в датафрейме – уберите колоки с
-    единственным значением параметра.
+2\. Минимизируйте количество колонок в датафрейме – уберите колоки с
+единственным значением параметра.
 
 ``` r
 data <- data %>% select(where(~ n_distinct(., na.rm = TRUE) > 1))
@@ -428,7 +427,7 @@ glimpse(data)
     $ winlog_user          <df[,4]> <data.frame[26 x 4]>
     $ winlog_activity_id   <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
 
-1.  Какое количество хостов представлено в данном датасете?
+3\. Какое количество хостов представлено в данном датасете?
 
 ``` r
 data %>% summarise(unique_hosts = n_distinct(winlog_computer_name))
@@ -439,8 +438,8 @@ data %>% summarise(unique_hosts = n_distinct(winlog_computer_name))
              <int>
     1            5
 
-1.  Подготовьте датафрейм с расшифровкой Windows Event_ID, приведите
-    типы данных к типу их значений.
+4\. Подготовьте датафрейм с расшифровкой Windows Event_ID, приведите
+типы данных к типу их значений.
 
 ``` r
 event_df <- event_df %>% rename(event_id = `Current Windows Event ID`,legacy_id = `Legacy Windows Event ID`,criticality = `Potential Criticality`,summary = `Event Summary`)
@@ -451,9 +450,9 @@ event_df <- event_df %>% mutate( event_id = as.numeric(gsub("[^0-9]", "", event_
 criticality = factor(criticality, levels = c("Low", "Medium", "High"), ordered = TRUE)) %>% filter(!is.na(event_id))
 ```
 
-1.  Есть ли в логе события с высоким и средним уровнем значимости?
-    Сколько их? Дополнительные материалы можно найти в Telegram
-    https://t.me/datadrivencybersecА
+5\. Есть ли в логе события с высоким и средним уровнем значимости?
+Сколько их? Дополнительные материалы можно найти в Telegram
+https://t.me/datadrivencybersecА
 
 ``` r
 data_with_criticality <- data %>% left_join(event_df, by = c("winlog_event_id" = "event_id"))
