@@ -31,7 +31,7 @@ sessionInfo()
 ``` 
 ## Подготовка данных
 
-1. Импортируйте данные в R. Это можно выполнить с помощью jsonlite::stream_in(file()) . Датасет находится по адресу https://storage.yandexcloud.net/iamcth-data/dataset.tar.gz.
+1\. Импортируйте данные в R. Это можно выполнить с помощью jsonlite::stream_in(file()) . Датасет находится по адресу https://storage.yandexcloud.net/iamcth-data/dataset.tar.gz.
 Также загрузили справочник по условным кодам журнала Windows.
 
 ```{r}
@@ -50,14 +50,14 @@ event_df <- rvest::html_table(webpage, fill = TRUE)[[1]]
 glimpse(event_df)
 ```
 
-2. Привести датасеты в вид “аккуратных данных”, преобразовать типы столбцов в
+2\. Привести датасеты в вид “аккуратных данных”, преобразовать типы столбцов в
 соответствии с типом данных
 
 ```{r}
 data$`@timestamp` <- as.POSIXct(data$`@timestamp`,format = "%Y-%m-%dT%H:%M:%OSZ", tz = "UTC")
 ```
 
-3. Просмотрите общую структуру данных с помощью функции glimpse()
+3\. Просмотрите общую структуру данных с помощью функции glimpse()
 
 ```{r}
 glimpse(data)
@@ -65,14 +65,14 @@ glimpse(data)
 
 ## Анализ
 
-1. Раскройте датафрейм избавившись от вложенных датафреймов. Для обнаружения таких можно использовать функцию dplyr::glimpse() , а для раскрытия вложенности – tidyr::unnest() . Обратите внимание, что при раскрытии теряются внешние названия колонок – это можно предотвратить если использовать параметр tidyr::unnest(..., names_sep = ) .
+1\. Раскройте датафрейм избавившись от вложенных датафреймов. Для обнаружения таких можно использовать функцию dplyr::glimpse() , а для раскрытия вложенности – tidyr::unnest() . Обратите внимание, что при раскрытии теряются внешние названия колонок – это можно предотвратить если использовать параметр tidyr::unnest(..., names_sep = ) .
 
 ```{r}
 data <- data %>% tidyr::unnest(cols = c(`@metadata`, event, log, winlog, ecs, host, agent), names_sep = "_")
 glimpse(data)
 ```
 
-2. Минимизируйте количество колонок в датафрейме – уберите колоки с
+2\. Минимизируйте количество колонок в датафрейме – уберите колоки с
 единственным значением параметра.
 
 ```{r}
@@ -80,13 +80,13 @@ data <- data %>% select(where(~ n_distinct(., na.rm = TRUE) > 1))
 glimpse(data)
 ```
 
-3. Какое количество хостов представлено в данном датасете?
+3\. Какое количество хостов представлено в данном датасете?
 
 ```{r}
 data %>% summarise(unique_hosts = n_distinct(winlog_computer_name))
 ```
 
-4. Подготовьте датафрейм с расшифровкой Windows Event_ID, приведите типы
+4\. Подготовьте датафрейм с расшифровкой Windows Event_ID, приведите типы
 данных к типу их значений.
 ```{r}
 event_df <- event_df %>% rename(event_id = `Current Windows Event ID`,legacy_id = `Legacy Windows Event ID`,criticality = `Potential Criticality`,summary = `Event Summary`)
@@ -96,7 +96,7 @@ event_df <- event_df %>% mutate( event_id = as.numeric(gsub("[^0-9]", "", event_
 criticality = factor(criticality, levels = c("Low", "Medium", "High"), ordered = TRUE)) %>% filter(!is.na(event_id))
 ```
 
-5. Есть ли в логе события с высоким и средним уровнем значимости? Сколько их?
+5\. Есть ли в логе события с высоким и средним уровнем значимости? Сколько их?
 Дополнительные материалы можно найти в Telegram https://t.me/datadrivencybersecА
 
 ```{r}
