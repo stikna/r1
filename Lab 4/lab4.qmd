@@ -35,134 +35,149 @@ sessionInfo()
 1. Импортировать данные DNS –
 https://storage.yandexcloud.net/dataset.ctfsec/dns.zip
 
-> url <- "https://storage.yandexcloud.net/dataset.ctfsec/dns.zip"
-> download.file(url, "dns.zip")
-пробую URL 'https://storage.yandexcloud.net/dataset.ctfsec/dns.zip'
-Content type 'application/zip' length 6407934 bytes (6.1 MB)
-downloaded 6.1 MB
+```{r}
+ url <- "https://storage.yandexcloud.net/dataset.ctfsec/dns.zip"
+ download.file(url, "dns.zip")
+ unzip("dns.zip")
+ dns_data <- read.csv("dns.log", sep = "\t", header = FALSE)
+```
 
 2. Добавить пропущенные данные о структуре данных (назначении столбцов)
 
-> zeek_dns_columns <- c(
-+     "ts", "uid", "id.orig_h", "id.orig_p", "id.resp_h", "id.resp_p",
-+     "proto", "trans_id", "query", "qclass", "qclass_name", "qtype",
-+     "qtype_name", "rcode", "rcode_name", "AA", "TC", "RD", "RA",
-+     "Z", "answers", "TTLs", "rejected"
-+ )
-> colnames(dns_data) <- zeek_dns_columns
+```{r}
+zeek_dns_columns <- c(
+    "ts", "uid", "id.orig_h", "id.orig_p", "id.resp_h", "id.resp_p",
+    "proto", "trans_id", "query", "qclass", "qclass_name", "qtype",
+    "qtype_name", "rcode", "rcode_name", "AA", "TC", "RD", "RA",
+    "Z", "answers", "TTLs", "rejected"
+)
+colnames(dns_data) <- zeek_dns_columns
+```
 
-3. Преобразовать данные в столбцах в нужный формат
+3\. Преобразовать данные в столбцах в нужный формат
 
-> dns_data <- dns_data %>% mutate(ts = as.POSIXct(ts, origin = "1970-01-01"), id.orig_p = as.integer(id.orig_p), id.resp_p = as.integer(id.resp_p), trans_id = as.integer(trans_id), qclass = as.integer(qclass), qtype = as.integer(qtype), rcode = as.integer(rcode), Z = as.integer(Z))
+```{r}
+library(dplyr)
+dns_data <- dns_data %>% 
+  mutate(ts = as.POSIXct(ts, origin = "1970-01-01"),
+    id.orig_p = as.integer(id.orig_p),
+    id.resp_p = as.integer(id.resp_p),
+    trans_id = as.integer(trans_id),
+    qclass = as.integer(qclass),
+    qtype = as.integer(qtype),
+    rcode = as.integer(rcode),
+    Z = as.integer(Z)
+  )
+```
+
+4\. Просмотреть общую структуру данных с помощью функции glimpse()
+
+```{r}
+glimpse(dns_data)
+```
+
+5\. Сколько участников информационного обмена в сети Доброй Организации?
  
-4. Просмотреть общую структуру данных с помощью функции glimpse()
+```{r}
+all_ips <- unique(c(dns_data$id.orig_h, dns_data$id.resp_h))
+length(all_ips)
+```
 
+6\. Какое соотношение участников обмена внутри сети и участников обращений к внешним ресурсам?
 
-> glimpse(dns_data)
-Rows: 427,935
-Columns: 23
-$ ts          <dttm> 2012-03-16 16:30:05, 2012-03-16 16:30:15, 2012-03-16 16:30:15, 2012-03-16 …
-$ uid         <chr> "CWGtK431H9XuaTN4fi", "C36a282Jljz7BsbGH", "C36a282Jljz7BsbGH", "C36a282Jlj…
-$ id.orig_h   <chr> "192.168.202.100", "192.168.202.76", "192.168.202.76", "192.168.202.76", "1…
-$ id.orig_p   <int> 45658, 137, 137, 137, 137, 137, 137, 137, 137, 137, 137, 137, 137, 45658, 4…
-$ id.resp_h   <chr> "192.168.27.203", "192.168.202.255", "192.168.202.255", "192.168.202.255", …
-$ id.resp_p   <int> 137, 137, 137, 137, 137, 137, 137, 137, 137, 137, 137, 137, 137, 5353, 5353…
-$ proto       <chr> "udp", "udp", "udp", "udp", "udp", "udp", "udp", "udp", "udp", "udp", "udp"…
-$ trans_id    <int> 33008, 57402, 57402, 57402, 57398, 57398, 57398, 62187, 62187, 62187, 62190…
-$ query       <chr> "*\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00", …
-$ qclass      <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
-$ qclass_name <chr> "C_INTERNET", "C_INTERNET", "C_INTERNET", "C_INTERNET", "C_INTERNET", "C_IN…
-$ qtype       <int> 33, 32, 32, 32, 32, 32, 32, 32, 32, 32, 33, 33, 33, 12, 12, 33, 32, 32, 32,…
-$ qtype_name  <chr> "SRV", "NB", "NB", "NB", "NB", "NB", "NB", "NB", "NB", "NB", "SRV", "SRV", …
-$ rcode       <int> 0, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 0, NA, NA, NA, N…
-$ rcode_name  <chr> "NOERROR", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-",…
-$ AA          <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…
-$ TC          <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…
-$ RD          <lgl> FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, …
-$ RA          <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…
-$ Z           <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, …
-$ answers     <chr> "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", …
-$ TTLs        <chr> "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", …
-$ rejected    <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…
+```{r}
+internal_ips <- all_ips[grepl("^192\\.168\\.", all_ips)]
+external_ips <- setdiff(all_ips, internal_ips)
+r <- length(internal_ips) / length(external_ips)
+r
+```
 
-4. Сколько участников информационного обмена в сети Доброй Организации?
- 
-> all_ips <- unique(c(dns_data$id.orig_h, dns_data$id.resp_h))
-> length(all_ips)
-[1] 1359
+7\. Найдите топ-10 участников сети, проявляющих наибольшую сетевую активность.
 
-5. Какое соотношение участников обмена внутри сети и участников обращений к внешним ресурсам?
+```{r}
+dns_data %>% 
+  count(id.orig_h) %>% 
+  arrange(desc(n)) %>% 
+  head(10)
+```
 
-> internal_ips <- all_ips[grepl("^192\\.168\\.", all_ips)]
-> external_ips <- setdiff(all_ips, internal_ips)
-> r <- length(internal_ips) / length(external_ips)
-> r
-[1] 10.2314
+8\. Найдите топ-10 доменов, к которым обращаются пользователи сети и соответственное количество обращений.
 
-6. Найдите топ-10 участников сети, проявляющих наибольшую сетевую активность.
+``` {r}
+dns_data %>% count(query) %>% arrange(desc(n)) %>% head(10)
+```                                                         
 
-> dns_data %>% count(id.orig_h) %>% arrange(desc(n)) %>% head(10)
-         id.orig_h     n
-1    10.10.117.210 75943
-2   192.168.202.93 26522
-3  192.168.202.103 18121
-4   192.168.202.76 16978
-5   192.168.202.97 16176
-6  192.168.202.141 14967
-7    10.10.117.209 14222
-8  192.168.202.110 13372
-9   192.168.203.63 12148
-10 192.168.202.106 10784
+9\. Опеределите базовые статистические характеристики (функция summary() ) интервала времени между последовательными обращениями к топ-10 доменам.
 
-7. Найдите топ-10 доменов, к которым обращаются пользователи сети и соответственное количество обращений.
+```{r}
+top_10_domains <- dns_data %>% count(query) %>% arrange(desc(n)) %>% head(10) %>% pull(query)
+top_times <- dns_data %>% filter(query %in% top_10_domains) %>% pull(ts) %>% sort()
+```
 
+10\. Часто вредоносное программное обеспечение использует DNS канал в качестве канала управления, периодически отправляя запросы на подконтрольный злоумышленникам DNS сервер. По периодическим запросам на один и тот же домен можно выявить скрытый DNS канал. Есть ли такие IP адреса в исследуемом датасете?
 
-> dns_data %>% count(query) %>% arrange(desc(n)) %>% head(10)
-                                                                     query     n
-1                                                teredo.ipv6.microsoft.com 39273
-2                                                         tools.google.com 14057
-3                                                            www.apple.com 13390
-4                                                           time.apple.com 13109
-5                                          safebrowsing.clients.google.com 11658
-6  *\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00 10401
-7                                                                     WPAD  9134
-8                                              44.206.168.192.in-addr.arpa  7248
-9                                                                 HPE8AA67  6929
-10                                                                  ISATAP  6569
-> 
+```{r}
+top_repeaters <- dns_data %>% count(id.orig_h, query) %>% filter(n > 50) %>% arrange(desc(n))
+head(top_repeaters, 20)
+```
 
-8. Опеределите базовые статистические характеристики (функция summary() ) интервала времени между последовательными обращениями к топ-10 доменам.
+11\. Определите местоположение (страну, город) и организацию-провайдера для топ-10 доменов. Для этого можно использовать сторонние сервисы, например http://ip-api.com (API-эндпоинт http://ip-api.com/json).
 
-> top_times <- dns_data %>% filter(query %in% top_10_domains) %>% pull(ts) %>% sort() 
-> time_diffs <- diff(top_times)
-> summary(time_diffs)
-     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
-    0.000     0.000     0.140     0.888     0.570 49677.590 
+```{r}
+library(httr)
+library(purrr)
 
-9. Часто вредоносное программное обеспечение использует DNS канал в качестве канала управления, периодически отправляя запросы на подконтрольный злоумышленникам DNS сервер. По периодическим запросам на один и тот же домен можно выявить скрытый DNS канал. Есть ли такие IP адреса в исследуемом датасете?
+top_10_dom <- dns_data |> 
+  count(query, sort = TRUE) |> 
+  head(10) |> 
+  pull(query)
 
-> top_repeaters <- dns_data %>% count(id.orig_h, query) %>% filter(n > 50) %>% arrange(desc(n))
-> head(top_repeaters, 20)
-         id.orig_h                           query     n
-1    10.10.117.210       teredo.ipv6.microsoft.com 27425
-2   192.168.202.93                   www.apple.com 10852
-3    10.10.117.210                tools.google.com 10179
-4   192.168.202.83     44.206.168.192.in-addr.arpa  7248
-5   192.168.202.76                        HPE8AA67  6929
-6   192.168.202.93                  time.apple.com  6038
-7   192.168.203.63                  imap.gmail.com  5543
-8   192.168.202.76                            WPAD  5175
-9  192.168.202.103                 api.twitter.com  4163
-10 192.168.202.103                api.facebook.com  4137
-11   10.10.117.210                stats.norton.com  3976
-12  192.168.202.87 safebrowsing.clients.google.com  3908
-13 192.168.202.113       teredo.ipv6.microsoft.com  3110
-14  192.168.202.85       teredo.ipv6.microsoft.com  2980
-15  192.168.204.60                  time.apple.com  2875
-16   10.10.117.210        ratings-wrs.symantec.com  2824
-17  192.168.202.97                  www.comodo.com  2470
-18 192.168.202.102                       API.EYE.FI  2405
-19 192.168.202.141                          ISATAP  2385
-20   10.10.117.209       teredo.ipv6.microsoft.com  2354
+get_geo <- function(domain) {
+  tryCatch({
+    ip <- try(nslookup(domain, server="8.8.8.8"), silent=TRUE)
+    
+    if(inherits(ip, "try-error") || is.null(ip)) {
+      return(data.frame(
+        domain = domain,
+        ip = NA,
+        country = NA,
+        city = NA,
+        isp = NA
+      ))
+    }
+    
+    response <- GET(paste0("http://ip-api.com/json/", ip[[1]]))
+    data <- content(response, "parsed")
+    
+    if(data$status == "success") {
+      data.frame(
+        domain = domain,
+        ip = data$query,
+        country = data$country,
+        city = data$city,
+        isp = data$isp
+      )
+    } else {
+      data.frame(
+        domain = domain,
+        ip = ip[[1]],
+        country = NA,
+        city = NA,
+        isp = NA
+      )
+    }
+  }, error = function(e) {
+    data.frame(
+      domain = domain,
+      ip = NA,
+      country = NA,
+      city = NA,
+      isp = NA
+    )
+  })
+}
 
-10. Определите местоположение (страну, город) и организацию-провайдера для топ-10 доменов. Для этого можно использовать сторонние сервисы, например http://ip-api.com (API-эндпоинт http://ip-api.com/json).
+results <- map_dfr(top_10_dom, get_geo)
+results
+```
+
