@@ -1,0 +1,107 @@
+---
+title: "Исследование информации о состоянии беспроводных сетей"
+format: 
+  md:
+    output-file: README.md
+---
+
+## Цель работы
+
+1. Закрепить навыки исследования данных журнала Windows Active Directory
+2. Изучить структуру журнала системы Windows Active Directory
+3. Зекрепить практические навыки использования языка программирования R для
+обработки данных
+4. Закрепить знания основных функций обработки данных экосистемы tidyverse
+языка R
+
+## Исходные данные
+
+1. Rstudio Desktop
+2. Наше рабочее окружение
+
+## План
+
+1. Импортировать данные.
+2. Провести анализ данных.
+
+## Шаги: 
+
+```{r}
+sessionInfo()
+``` 
+## Подготовка данных
+
+1. Импортируйте данные в R. Это можно выполнить с помощью jsonlite::stream_in(file()) . Датасет находится по адресу https://storage.yandexcloud.net/iamcth-data/dataset.tar.gz.
+Также загрузили справочник по условным кодам журнала Windows.
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+json_file <- "C:\\Users\\nastya\\AppData\\Local\\Temp\\Rtmp6HHfRy\\caldera_attack_evals_round1_day1_2019-10-20201108.json"
+data <- jsonlite::stream_in(file(json_file))
+webpage_url <- "https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/appendix-l--events-to-monitor"
+webpage <- xml2::read_html(webpage_url)
+event_df <- rvest::html_table(webpage, fill = TRUE)[[1]]
+
+```
+```{r}
+glimpse(event_df)
+```
+
+2. Привести датасеты в вид “аккуратных данных”, преобразовать типы столбцов в
+соответствии с типом данных
+
+```{r}
+data$`@timestamp` <- as.POSIXct(data$`@timestamp`,format = "%Y-%m-%dT%H:%M:%OSZ", tz = "UTC")
+```
+
+3. Просмотрите общую структуру данных с помощью функции glimpse()
+
+```{r}
+glimpse(data)
+```
+
+## Анализ
+
+1. Раскройте датафрейм избавившись от вложенных датафреймов. Для обнаружения таких можно использовать функцию dplyr::glimpse() , а для раскрытия вложенности – tidyr::unnest() . Обратите внимание, что при раскрытии теряются внешние названия колонок – это можно предотвратить если использовать параметр tidyr::unnest(..., names_sep = ) .
+
+```{r}
+data <- data %>% tidyr::unnest(cols = c(`@metadata`, event, log, winlog, ecs, host, agent), names_sep = "_")
+glimpse(data)
+```
+
+2. Минимизируйте количество колонок в датафрейме – уберите колоки с
+единственным значением параметра.
+
+```{r}
+data <- data %>% select(where(~ n_distinct(., na.rm = TRUE) > 1))
+glimpse(data)
+```
+
+3. Какое количество хостов представлено в данном датасете?
+
+```{r}
+data %>% summarise(unique_hosts = n_distinct(winlog_computer_name))
+```
+
+4. Подготовьте датафрейм с расшифровкой Windows Event_ID, приведите типы
+данных к типу их значений.
+```{r}
+event_df <- event_df %>% rename(event_id = `Current Windows Event ID`,legacy_id = `Legacy Windows Event ID`,criticality = `Potential Criticality`,summary = `Event Summary`)
+```
+```{r}
+event_df <- event_df %>% mutate( event_id = as.numeric(gsub("[^0-9]", "", event_id)),
+criticality = factor(criticality, levels = c("Low", "Medium", "High"), ordered = TRUE)) %>% filter(!is.na(event_id))
+```
+
+5. Есть ли в логе события с высоким и средним уровнем значимости? Сколько их?
+Дополнительные материалы можно найти в Telegram https://t.me/datadrivencybersecА
+
+```{r}
+data_with_criticality <- data %>% left_join(event_df, by = c("winlog_event_id" = "event_id"))
+data_with_criticality %>% filter(criticality %in% c("High", "Medium")) %>%
+      nrow()
+```
+
