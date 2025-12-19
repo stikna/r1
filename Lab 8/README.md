@@ -53,11 +53,15 @@ sessionInfo()
      [9] knitr_1.50        jsonlite_2.0.0    xfun_0.53         digest_0.6.37    
     [13] rlang_1.1.6       evaluate_1.0.5   
 
-##Настроить подключение к Yandex Query из DataLens ![](screen/1.png)
+## Настроить подключение к Yandex Query из DataLens
+
+![](screen/1.png)
 
 ## Создать из запроса YandexQuery датасет DataLens
 
-![](screen/2.png) \## Делаем нужные графики и диаграммы
+![](screen/2.png)
+
+## Делаем нужные графики и диаграммы
 
 1\. Представить в виде круговой диаграммы соотношение внешнего и
 внутреннего сетевого трафика.
