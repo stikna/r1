@@ -247,13 +247,6 @@ ap_tidy %>% select(BSSID, OUI, ESSID) %>% head(10)
 шифрования WPA3, и названия точек доступа, реализованных на этих
 устройствах
 
-ap_tidy %\>% + filter(Authentication == “SAE PSK” | Privacy == “WPA3
-WPA2”) %\>% + distinct(ESSID) %\>% + arrange(ESSID) %\>% print() ESSID  
-1 “Christie’s”  
-2 “iPhone (Анастасия)”  
-3 “iPhone XS Max 001f98a001f431001f98a” 4 “Димасик”  
-5 NA
-
 ``` r
 ap_tidy %>%
     filter(Authentication == "SAE PSK" | Privacy == "WPA3 WPA2") %>%
@@ -302,13 +295,26 @@ ap_tidy %>% arrange(desc(Connection_duration)) %>% print()
 
 5\. Обнаружили топ-10 самых быстрых точек доступа.
 
-> ap_tidy %\>% + arrange(desc(Speed)) %\>% + select(BSSID, ESSID, Speed)
-> %\>% + head(10) BSSID ESSID Speed 1 26:20:53:0C:98:E8 NA 866 2
-> 96:FF:FC:91:EF:64 NA 866 3 CE:48:E7:86:4E:33 iPhone (Анастасия) 866 4
-> 8E:1F:94:96:DA:FD iPhone (Анастасия) 866 5 9A:75:A8:B9:04:1E KC 360 6
-> 4A:EC:1E:DB:BF:95 POCO X5 Pro 5G 360 7 56:C5:2B:9F:84:90 OnePlus 6T
-> 360 8 E8:28:C1:DC:B2:41 MIREA_GUESTS 360 9 E8:28:C1:DC:B2:40
-> MIREA_HOTSPOT 360 10 E8:28:C1:DC:B2:42 NA 360
+``` r
+ap_tidy %>%
+      arrange(desc(Speed)) %>%
+      select(BSSID, ESSID, Speed) %>%
+      head(10)
+```
+
+    # A tibble: 10 × 3
+       BSSID             ESSID              Speed
+       <chr>             <chr>              <dbl>
+     1 26:20:53:0C:98:E8 <NA>                 866
+     2 96:FF:FC:91:EF:64 <NA>                 866
+     3 CE:48:E7:86:4E:33 iPhone (Анастасия)   866
+     4 8E:1F:94:96:DA:FD iPhone (Анастасия)   866
+     5 9A:75:A8:B9:04:1E KC                   360
+     6 4A:EC:1E:DB:BF:95 POCO X5 Pro 5G       360
+     7 56:C5:2B:9F:84:90 OnePlus 6T           360
+     8 E8:28:C1:DC:B2:41 MIREA_GUESTS         360
+     9 E8:28:C1:DC:B2:40 MIREA_HOTSPOT        360
+    10 E8:28:C1:DC:B2:42 <NA>                 360
 
 6\. Отсортировали точки доступа по частоте отправки запросов (beacons) в
 единицу времени по их убыванию
